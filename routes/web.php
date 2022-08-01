@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\Hello;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,7 +17,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
+
+Route::resource('users', UserController::class)->only(['index', 'show']);
 
 Route::get('/broadcast', function () {
     broadcast(new Hello());
