@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Bet;
 use App\Events\Hello;
 use Illuminate\Http\Request;
 
@@ -35,12 +36,10 @@ class BetController extends Controller
      */
     public function store(Request $request)
     {
-        event(new Hello());
+        $gambler = $request->input('user');
+        $amount = $request->input('amount');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Bet created successfully'
-        ]);
+        event(new Bet($gambler, $amount));
     }
 
     /**
