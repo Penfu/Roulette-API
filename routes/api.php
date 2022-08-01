@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\LoginController;
+
 use App\Http\Controllers\BetController;
 
 /*
@@ -19,5 +21,7 @@ use App\Http\Controllers\BetController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('login', [LoginController::class, 'authenticate']);
 
 Route::apiResource('bets', BetController::class);
