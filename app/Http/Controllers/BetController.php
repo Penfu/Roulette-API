@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\Bet;
-use App\Events\Hello;
+use App\Events\BetEvent;
+use App\Models\Bet;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class BetController extends Controller
@@ -36,10 +37,17 @@ class BetController extends Controller
      */
     public function store(Request $request)
     {
-        $gambler = $request->input('user');
-        $amount = $request->input('amount');
+        $user = $request->input('user');
+        $color = $request->input('color');
+        $value = $request->input('value');
 
-        event(new Bet($gambler, $amount));
+        $bet = Bet::create([
+            'user_id' => User::where('name', $user)->first()->id,
+            'color' => $color,
+            'value' => $value,
+        ]);
+
+        broadcast(new BetEvent($bet))->toOthers();
     }
 
     /**

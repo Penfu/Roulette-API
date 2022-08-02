@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Bet;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -10,29 +11,28 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class Bet implements ShouldBroadcast
+class BetEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private string $gambler;
-    private int $amount;
+    private Bet $bet;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($gambler, $amount)
+    public function __construct(Bet $bet)
     {
-        $this->gambler = $gambler;
-        $this->amount = $amount;
+        $this->bet = $bet;
     }
 
     public function broadcastWith()
     {
         return [
-            'gambler' => $this->gambler,
-            'amount' => $this->amount
+            'user' => $this->bet->user->name,
+            'color' => $this->bet->color,
+            'value' => $this->bet->value
         ];
     }
 
