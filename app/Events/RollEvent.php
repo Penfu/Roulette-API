@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Bet;
+use App\Models\Roll;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -11,23 +11,22 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class BetEvent implements ShouldBroadcast
+class RollEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private Bet $bet;
+    private Roll $roll;
 
-    public function __construct(Bet $bet)
+    public function __construct(Roll $roll)
     {
-        $this->bet = $bet;
+        $this->roll = $roll;
     }
 
     public function broadcastWith()
     {
         return [
-            'user' => $this->bet->user->name,
-            'color' => $this->bet->color,
-            'value' => $this->bet->value
+            'color' => $this->roll->color,
+            'value' => $this->roll->value
         ];
     }
 
@@ -38,6 +37,6 @@ class BetEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('roulette');
+        return new Channel('roll');
     }
 }

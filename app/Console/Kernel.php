@@ -2,9 +2,8 @@
 
 namespace App\Console;
 
-use App\Events\BetEvent;
-use App\Models\Bet;
-use App\Models\User;
+use App\Jobs\ProcessRoll;
+use App\Models\Roll;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Log;
@@ -20,17 +19,15 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-
-        // Send a bet event to the roulette channel every 30 seconds
         $schedule->call(function () {
-            $bet = Bet::create([
-                'user_id' => 1,
-                'color' => 'red',
-                'value' => rand(1, 36),
-            ]);
+            $colors = ['red', 'black', 'green'];
 
-            broadcast(new BetEvent($bet))->toOthers();
-        })->cron('*/1 * * * *');
+            $roll = Roll::create([
+                'color' => $colors[array_rand($colors)],
+                'value' => rand(0, 36),
+            ]);
+            ProcessRoll::dispatch($roll);
+        })->everyMinute();
     }
 
     /**

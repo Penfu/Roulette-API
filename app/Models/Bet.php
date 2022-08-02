@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Broadcasting\Channel;
 
 class Bet extends Model
 {
-    use HasFactory;
+    use BroadcastsEvents, HasFactory;
 
     protected $fillable = [
         'user_id',
