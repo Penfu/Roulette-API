@@ -2,8 +2,6 @@
 
 namespace App\Console;
 
-use App\Jobs\ProcessRoll;
-use App\Models\Roll;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Log;
@@ -18,16 +16,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
-        $schedule->call(function () {
-            $colors = ['red', 'black', 'green'];
 
-            $roll = Roll::create([
-                'color' => $colors[array_rand($colors)],
-                'value' => rand(0, 36),
-            ]);
-            ProcessRoll::dispatch($roll);
-        })->everyMinute();
+    }
+
+    protected function shortSchedule(\Spatie\ShortSchedule\ShortSchedule $shortSchedule)
+    {
+        $shortSchedule->command('roll')->everySeconds(30);
     }
 
     /**

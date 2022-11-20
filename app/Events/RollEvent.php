@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\Roll;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -11,22 +10,34 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+use app\Models\Roll;
+
 class RollEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private Roll $roll;
+    private string $status;
+    private int $timer;
+    private array $bets;
+    private ?Roll $result;
 
-    public function __construct(Roll $roll)
+    public function __construct(string $status, int $timer, array $bets, ?Roll $result = null)
     {
-        $this->roll = $roll;
+        $this->status = $status;
+        $this->timer = $timer;
+        $this->bets = $bets;
+        $this->result = $result;
     }
 
     public function broadcastWith()
     {
         return [
-            'color' => $this->roll->color,
-            'value' => $this->roll->value
+            'status' => $this->status,
+            'timer' => $this->timer,
+            'bets' => $this->bets,
+            'result' => $this->result
+                ? [ 'value' => $this->result->value, 'color' => $this->result->color]
+                : null,
         ];
     }
 
@@ -37,6 +48,6 @@ class RollEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('roll');
+        return new Channel('roulette');
     }
 }
