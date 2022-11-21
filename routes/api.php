@@ -21,7 +21,8 @@ use App\Http\Controllers\BetController;
 
 Route::post('login', [AuthController::class, 'authenticate']);
 
-Route::apiResource('users', UserController::class)->middleware('auth:sanctum');
+Route::get('users', [UserController::class, 'index']);
+Route::get('users/me', [UserController::class, 'show'])->middleware('auth:sanctum');
 
 Route::apiResource('rolls', RollController::class)->only(['index']);
 
