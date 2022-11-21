@@ -45,9 +45,11 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show(Request $request)
     {
-        return view('users.show')->with(['user' => $user]);
+        $user = $request->user();
+
+        return response()->json($user);
     }
 
     /**
