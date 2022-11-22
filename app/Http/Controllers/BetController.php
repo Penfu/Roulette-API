@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\BetEvent;
-use App\Models\Bet;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+
+use App\Models\User;
 
 class BetController extends Controller
 {
@@ -37,17 +37,38 @@ class BetController extends Controller
      */
     public function store(Request $request)
     {
-        $user = $request->input('user');
+        $user = $request->user();
         $color = $request->input('color');
         $value = $request->input('value');
 
-        $bet = Bet::create([
-            'user_id' => User::where('name', $user)->first()->id,
+        $user->bets()->create([
             'color' => $color,
             'value' => $value,
         ]);
 
-        broadcast(new BetEvent($bet))->toOthers();
+        $user->balance -= $value;
+        $user->save();
+
+        // Store the bet in the cache
+        $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
+
+        $betExists = false;
+        foreach ($bets[$color] as $key => $bet) {
+            if ($bet['user'] == $user->name) {
+                $bets[$color][$key]['value'] += $value;
+                $betExists = true;
+            }
+        }
+
+        if (!$betExists) {
+            $bets[$color][] = [
+                'user' => $user->name,
+                'color' => $color,
+                'value' => $value,
+            ];
+        }
+
+        Cache::put('bets', $bets);
     }
 
     /**
