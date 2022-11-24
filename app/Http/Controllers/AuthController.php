@@ -10,7 +10,7 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function authenticate(Request $request): JsonResponse
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
 
@@ -24,5 +24,28 @@ class AuthController extends Controller
         }
 
         return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    public function register(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|string|email|unique:users',
+            'password' => 'required|string',
+        ]);
+
+        $user = new User([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'balance' => 100,
+        ]);
+
+        $user->save();
+
+        return response()->json([
+            'user' => $user,
+            'token' => $user->createToken('token')->plainTextToken,
+        ]);
     }
 }
