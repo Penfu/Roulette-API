@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-
-use App\Models\User;
+use App\Models\Bet;
 
 class BetController extends Controller
 {
@@ -41,18 +40,23 @@ class BetController extends Controller
         $color = $request->input('color');
         $value = $request->input('value');
 
-        $user->bets()->create([
-            'color' => $color,
-            'value' => $value,
-        ]);
+        // Conditions
+        if ($user->balance < $value) {
+            return response()->json(['message' => 'Insufficient funds'], 400);
+        }
 
-        $user->balance -= $value;
-        $user->save();
-
-        // Store the bet in the cache
+        // Get bets for the current roll
+        $roll = Cache::get('roll_id');
         $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
 
+        // Update or create the bet in the database
+        $bet = Bet::firstOrNew(['user_id' => $user->id, 'roll_id' => $roll, 'color' => $color]);
+        $bet->value += $value;
+        $bet->save();
+
+        // Update or create the bet in the cache
         $betExists = false;
+
         foreach ($bets[$color] as $key => $bet) {
             if ($bet['user'] == $user->name) {
                 $bets[$color][$key]['value'] += $value;
@@ -62,13 +66,15 @@ class BetController extends Controller
 
         if (!$betExists) {
             $bets[$color][] = [
-                'user' => $user->name,
-                'color' => $color,
                 'value' => $value,
+                'user' => $user->name,
             ];
         }
 
         Cache::put('bets', $bets);
+
+        $user->balance -= $value;
+        $user->save();
     }
 
     /**
