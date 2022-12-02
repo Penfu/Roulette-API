@@ -67,21 +67,23 @@ class RollCommand extends Command
      */
     public function handle()
     {
+        $roll = Roll::create();
+
+        Cache::put('roll_id', $roll->id);
         Cache::forget('bets');
 
         // Open bet
         $this->broadcastLoop(Status::OPEN, self::OPEN_BET_DURATION);
 
         // Close bet
-        $case = self::CASES[random_int(1, count(self::CASES)) - 1];
-        $roll = Roll::create([
-            'value' => $case['value'],
-            'color' => $case['color'],
-        ]);
+        $rndRoll = self::CASES[random_int(1, count(self::CASES)) - 1];
+        $roll->color = $rndRoll['color'];
+        $roll->value = $rndRoll['value'];
 
         $this->broadcastLoop(Status::CLOSE, self::ROLL_DURATION, $roll);
 
         // Result
+        $roll->save();
         $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
         $winningBets = $bets[$roll->color];
 

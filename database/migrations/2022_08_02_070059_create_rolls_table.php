@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('rolls', function (Blueprint $table) {
             $table->id();
-            $table->string('color');
-            $table->integer('value');
+            $table->string('color')->nullable();
+            $table->integer('value')->nullable();
             $table->timestamps();
         });
     }

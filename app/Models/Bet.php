@@ -11,13 +11,19 @@ class Bet extends Model
     use BroadcastsEvents, HasFactory;
 
     protected $fillable = [
-        'user_id',
         'color',
         'value',
+        'user_id',
+        'roll_id',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function roll()
+    {
+        return $this->belongsTo(Roll::class);
     }
 }

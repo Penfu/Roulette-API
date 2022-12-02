@@ -13,4 +13,9 @@ class Roll extends Model
         'color',
         'value',
     ];
+
+    public function bets()
+    {
+        return $this->hasMany(Bet::class);
+    }
 }
