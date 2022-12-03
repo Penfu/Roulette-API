@@ -1,15 +1,19 @@
-_id: req_5005abcaf99f488381bcc1f9a569acc5
+_id: req_88fb77d3f714404c8bfce032fe9ccc89
 type: Request
 parentId: fld_4e0a4e5fe2c641c0b1f9bfb69613daa1
-modified: 1670099203496
-created: 1670098348999
-url: "{{ base_url }}/login"
-name: Login
+modified: 1670099178299
+created: 1670099135425
+url: "{{ base_url }}/register"
+name: Register
 description: ""
 method: POST
 body:
   mimeType: multipart/form-data
   params:
+    - id: pair_5800be8e500441c6bd95f9167562a4f3
+      name: name
+      value: test
+      description: ""
     - id: pair_06f4a3a0b850440bb6d3449b0f8360e5
       name: email
       value: test@test.com
@@ -29,7 +33,7 @@ headers:
     value: application/json
     description: ""
 authentication: {}
-metaSortKey: -1670098348999
+metaSortKey: -1670098348949
 isPrivate: false
 settingStoreCookies: true
 settingSendCookies: true
