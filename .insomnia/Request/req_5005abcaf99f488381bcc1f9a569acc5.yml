@@ -1,0 +1,39 @@
+_id: req_5005abcaf99f488381bcc1f9a569acc5
+type: Request
+parentId: fld_4e0a4e5fe2c641c0b1f9bfb69613daa1
+modified: 1670098628938
+created: 1670098348999
+url: "{{ base_url }}/login"
+name: Login
+description: ""
+method: POST
+body:
+  mimeType: multipart/form-data
+  params:
+    - id: pair_06f4a3a0b850440bb6d3449b0f8360e5
+      name: email
+      value: penfu@gmail.com
+      description: ""
+    - id: pair_81dd9fe8310d41109299fdacddd54622
+      name: password
+      value: root
+      description: ""
+parameters: []
+headers:
+  - id: pair_94b0ea62020741619eefe3c1598ed4f2
+    name: Content-Type
+    value: multipart/form-data
+    description: ""
+  - id: pair_7950089d329a4276bc575885a9ded452
+    name: Accept
+    value: application/json
+    description: ""
+authentication: {}
+metaSortKey: -1670098348999
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global
