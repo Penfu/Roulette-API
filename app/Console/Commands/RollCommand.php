@@ -41,10 +41,11 @@ class RollCommand extends Command
      */
     protected $description = 'Command description';
 
-    const BROADCAST_FREQUENCY = 500; // ms
-    const OPEN_BET_DURATION   = 15000; // ms
-    const ROLL_DURATION       = 5000; // ms
-    const RESULT_DURATION     = 5000; // ms
+    // Duration of each step in ms
+    const BROADCAST_FREQUENCY = 500;
+    const OPEN_BET_DURATION   = 15000;
+    const ROLL_DURATION       = 5000;
+    const RESULT_DURATION     = 5000;
 
     const CASES = [
         ['value' => 1, 'color' => 'red'],
@@ -68,9 +69,7 @@ class RollCommand extends Command
     public function handle()
     {
         $roll = Roll::create();
-
         Cache::put('roll_id', $roll->id);
-        Cache::forget('bets');
 
         // Open bet
         $this->broadcastLoop(Status::OPEN, self::OPEN_BET_DURATION);
@@ -83,7 +82,11 @@ class RollCommand extends Command
         $this->broadcastLoop(Status::CLOSE, self::ROLL_DURATION, $roll);
 
         // Result
+        Cache::forget('bets');
+
+        $roll->ended_at = now();
         $roll->save();
+
         $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
         $winningBets = $bets[$roll->color];
 
@@ -99,9 +102,7 @@ class RollCommand extends Command
     private function broadcastLoop(Status $status, int $timer, ?Roll $roll = null)
     {
         do {
-            $bets = $status == Status::RESULT
-                ? []
-                : Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
+            $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
 
             broadcast(new RollEvent($status->value(), $timer, $bets, $roll));
 

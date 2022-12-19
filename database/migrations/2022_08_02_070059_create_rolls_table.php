@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('color')->nullable();
             $table->integer('value')->nullable();
             $table->timestamps();
+            $table->timestamp('ended_at')->nullable();
         });
     }
 

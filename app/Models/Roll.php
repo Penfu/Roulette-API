@@ -18,4 +18,10 @@ class Roll extends Model
     {
         return $this->hasMany(Bet::class);
     }
+
+    // Eloquent Scope to take only ended roll
+    public function scopeEnded($query)
+    {
+        return $query->whereNotNull('ended_at');
+    }
 }

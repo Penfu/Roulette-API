@@ -41,16 +41,31 @@ class UserController extends Controller
     }
 
     /**
+     * Display the authenticated user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function me(Request $request)
+    {
+        return response()->json($request->user());
+    }
+
+    /**
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request)
+    public function show(User $user)
     {
-        $user = $request->user();
-
         return response()->json($user);
+    }
+
+
+    public function stats(User $user)
+    {
+        return response()->json($user->stats());
     }
 
     /**

@@ -26,4 +26,9 @@ class Bet extends Model
     {
         return $this->belongsTo(Roll::class);
     }
+
+    public function isWin()
+    {
+        return $this->color === $this->roll->color;
+    }
 }
