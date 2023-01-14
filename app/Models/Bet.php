@@ -17,6 +17,10 @@ class Bet extends Model
         'roll_id',
     ];
 
+    protected $appends = ['is_win'];
+
+    protected $hidden = ['roll'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -27,8 +31,23 @@ class Bet extends Model
         return $this->belongsTo(Roll::class);
     }
 
-    public function isWin()
+    public function getIsWinAttribute()
     {
         return $this->color === $this->roll->color;
+    }
+
+    public function ScopeRed($query)
+    {
+        return $query->where('color', 'red');
+    }
+
+    public function ScopeBlack($query)
+    {
+        return $query->where('color', 'black');
+    }
+
+    public function ScopeGreen($query)
+    {
+        return $query->where('color', 'green');
     }
 }

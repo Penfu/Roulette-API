@@ -27,6 +27,7 @@ class UserController extends Controller
     public function bets(User $user)
     {
         $bets = $user->bets()->with('roll')->get();
+
         return response()->json($bets);
     }
 
