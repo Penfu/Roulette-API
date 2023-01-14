@@ -16,12 +16,12 @@ class BetController extends Controller
      */
     public function store(Request $request)
     {
-        $user = $request->user();
+        $amount = $request->input('amount');
         $color = $request->input('color');
-        $value = $request->input('value');
+        $user = $request->user();
 
         // Conditions
-        if ($user->balance < $value) {
+        if ($user->balance < $amount) {
             return response()->json(['message' => 'Insufficient funds'], 400);
         }
 
@@ -31,7 +31,7 @@ class BetController extends Controller
 
         // Update or create the bet in the database
         $bet = Bet::firstOrNew(['user_id' => $user->id, 'roll_id' => $roll, 'color' => $color]);
-        $bet->value += $value;
+        $bet->amount += $amount;
         $bet->save();
 
         // Update or create the bet in the cache
@@ -39,21 +39,21 @@ class BetController extends Controller
 
         foreach ($bets[$color] as $key => $bet) {
             if ($bet['user'] == $user->name) {
-                $bets[$color][$key]['value'] += $value;
+                $bets[$color][$key]['amount'] += $amount;
                 $betExists = true;
             }
         }
 
         if (!$betExists) {
             $bets[$color][] = [
-                'value' => $value,
+                'amount' => $amount,
                 'user' => $user->name,
             ];
         }
 
         Cache::put('bets', $bets);
 
-        $user->balance -= $value;
+        $user->balance -= $amount;
         $user->save();
     }
 

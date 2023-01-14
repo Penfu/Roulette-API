@@ -82,20 +82,21 @@ class RollCommand extends Command
         $this->broadcastLoop(Status::CLOSE, self::ROLL_DURATION, $roll);
 
         // Result
-        Cache::forget('bets');
-
         $roll->ended_at = now();
         $roll->save();
 
         $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
+        logger($bets);
+
         $winningBets = $bets[$roll->color];
 
         foreach ($winningBets as $bet) {
             $user = User::where('name', $bet['user'])->first();
-            $user->balance += $bet['value'] * 2;
+            $user->balance += $bet['amount'] * 2;
             $user->save();
         }
 
+        Cache::forget('bets');
         $this->broadcastLoop(Status::RESULT, self::RESULT_DURATION, $roll);
     }
 

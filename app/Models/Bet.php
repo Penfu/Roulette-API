@@ -12,7 +12,7 @@ class Bet extends Model
 
     protected $fillable = [
         'color',
-        'value',
+        'amount',
         'user_id',
         'roll_id',
     ];

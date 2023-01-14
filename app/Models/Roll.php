@@ -53,7 +53,7 @@ class Roll extends Model
 
     public function getAmountAttribute()
     {
-        return $this->bets()->sum('value');
+        return $this->bets()->sum('amount');
     }
 
     public function scopeEnded($query)
