@@ -26,7 +26,8 @@ class UserController extends Controller
     // Returns user's bets with result
     public function bets(User $user)
     {
-        $bets = $user->bets()->with('roll')->get();
+        // From the most recent to the oldest
+        $bets = $user->bets()->with('roll')->orderBy('created_at', 'desc')->get();
 
         return response()->json($bets);
     }
