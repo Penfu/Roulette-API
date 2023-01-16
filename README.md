@@ -40,7 +40,7 @@ Optionaly watch the changes and auto build.
 npm run watch
 ```
 
-### Run the server
+### Run web server
 
 Generate the encryption key
 
@@ -53,4 +53,10 @@ php artisan serve
 
 ```bash
 php artisan websockets:serve
+```
+
+### Run the game
+
+```bash
+php artisan short-schedule:run
 ```
