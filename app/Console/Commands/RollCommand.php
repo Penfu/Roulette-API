@@ -86,11 +86,9 @@ class RollCommand extends Command
         $roll->save();
 
         $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
-        logger($bets);
+        $wins = $bets[$roll->color];
 
-        $winningBets = $bets[$roll->color];
-
-        foreach ($winningBets as $bet) {
+        foreach ($wins as $bet) {
             $user = User::where('name', $bet['user'])->first();
             $user->balance += $bet['amount'] * 2;
             $user->save();
@@ -109,6 +107,6 @@ class RollCommand extends Command
 
             usleep(self::BROADCAST_FREQUENCY * 1000);
             $timer -= self::BROADCAST_FREQUENCY;
-        } while ($timer > 0);
+        } while ($timer >= 0);
     }
 }

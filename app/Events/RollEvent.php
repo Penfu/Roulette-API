@@ -4,8 +4,6 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -21,7 +19,7 @@ class RollEvent implements ShouldBroadcast
     private array $bets;
     private ?Roll $result;
 
-    public function __construct(string $status, int $timer, array $bets, ?Roll $result = null)
+    public function __construct(string $status, int $timer = 0, array $bets = [], ?Roll $result = null)
     {
         $this->status = $status;
         $this->timer = $timer;
@@ -35,9 +33,12 @@ class RollEvent implements ShouldBroadcast
             'status' => $this->status,
             'timer' => $this->timer,
             'bets' => $this->bets,
-            'result' => $this->result
-                ? [ 'value' => $this->result->value, 'color' => $this->result->color]
-                : null,
+            'result' => !$this->result
+                ?: [
+                    'id' => $this->result->id,
+                    'value' => $this->result->value,
+                    'color' => $this->result->color
+                ]
         ];
     }
 
