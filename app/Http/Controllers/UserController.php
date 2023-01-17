@@ -23,11 +23,12 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    // Returns user's bets with result
     public function bets(User $user)
     {
-        // From the most recent to the oldest
-        $bets = $user->bets()->with('roll')->orderBy('created_at', 'desc')->get();
+        $offset = request()->query('offset', 0);
+        $limit = request()->query('limit', 10);
+
+        $bets = $user->bets()->with('roll')->offset($offset)->limit($limit)->latest()->get();
 
         return response()->json($bets);
     }
