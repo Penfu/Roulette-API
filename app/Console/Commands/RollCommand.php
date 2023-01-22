@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Console\Command;
 
 use App\Events\RollEvent;
+use App\Helpers\ColorHelper;
 use App\Models\User;
 use App\Models\Roll;
 
@@ -90,7 +91,7 @@ class RollCommand extends Command
 
         foreach ($wins as $bet) {
             $user = User::where('name', $bet['user'])->first();
-            $user->balance += $bet['amount'] * 2;
+            $user->balance += $bet['amount'] * ColorHelper::MULTIPLIERS[$roll->color];
             $user->save();
         }
 

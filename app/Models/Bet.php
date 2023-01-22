@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Bet extends Model
 {
-    use BroadcastsEvents, HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'color',
