@@ -46,7 +46,7 @@ class RollCommand extends Command
     const BROADCAST_FREQUENCY = 500;
     const OPEN_BET_DURATION   = 15000;
     const ROLL_DURATION       = 5000;
-    const RESULT_DURATION     = 5000;
+    const RESULT_DURATION     = 7000;
 
     const CASES = [
         ['value' => 1, 'color' => 'red'],
