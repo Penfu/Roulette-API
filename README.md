@@ -25,7 +25,7 @@ Setup the environment variables by making your own **.env** file from the exampl
 Then run the migrations and seeders.
 
 ```bash
-php artisan migrate --seed
+php artisan migrate:fresh --seed
 ```
 
 ### Public resources
