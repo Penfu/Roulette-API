@@ -10,18 +10,20 @@ use App\Helpers\ColorHelper;
 use App\Models\User;
 use App\Models\Roll;
 
-enum Status
+enum Step
 {
-    case OPEN;
-    case CLOSE;
-    case RESULT;
+    case BET;
+    case ROLL;
+    case ROLL_TO_RESULT;
+    case DISPLAY_RESULT;
 
     public function value(): string
     {
         return match ($this) {
-            Status::OPEN => 'OPEN',
-            Status::CLOSE => 'CLOSE',
-            Status::RESULT => 'RESULT',
+            Step::BET => 'BET',
+            Step::ROLL => 'ROLL',
+            Step::ROLL_TO_RESULT => 'ROLL_TO_RESULT',
+            Step::DISPLAY_RESULT => 'DISPLAY_RESULT',
         };
     }
 }
@@ -44,9 +46,11 @@ class RollCommand extends Command
 
     // Duration of each step in ms
     const BROADCAST_FREQUENCY = 500;
-    const OPEN_BET_DURATION   = 15000;
-    const ROLL_DURATION       = 5000;
-    const RESULT_DURATION     = 7000;
+
+    const BET_DURATION = 15000;
+    const ROLL_DURATION = 4000;
+    const ROLL_TO_RESULT_DURATION = 2000;
+    const DISPLAY_RESULT_DURATION = 5000;
 
     const CASES = [
         ['value' => 1, 'color' => 'red'],
@@ -69,20 +73,21 @@ class RollCommand extends Command
      */
     public function handle()
     {
+        // Create roll
         $roll = Roll::create();
         Cache::put('roll_id', $roll->id);
 
-        // Open bet
-        $this->broadcastLoop(Status::OPEN, self::OPEN_BET_DURATION);
+        // Step 1: Open bet
+        $this->broadcastLoop(Step::BET, self::BET_DURATION);
 
-        // Close bet
+        // Step 2: Close the bet, Roll the wheel
         $rndRoll = self::CASES[random_int(1, count(self::CASES)) - 1];
         $roll->color = $rndRoll['color'];
         $roll->value = $rndRoll['value'];
 
-        $this->broadcastLoop(Status::CLOSE, self::ROLL_DURATION, $roll);
+        $this->broadcastLoop(Step::ROLL, self::ROLL_DURATION, $roll);
 
-        // Result
+        // Step 3: Generate the result, Roll to result
         $roll->ended_at = now();
         $roll->save();
 
@@ -95,11 +100,16 @@ class RollCommand extends Command
             $user->save();
         }
 
+        $this->broadcastLoop(Step::ROLL_TO_RESULT, self::ROLL_TO_RESULT_DURATION, $roll);
+
+        // Step 4: Display the result
+        $this->broadcastLoop(Step::DISPLAY_RESULT, self::DISPLAY_RESULT_DURATION, $roll);
+
+        // Reset
         Cache::forget('bets');
-        $this->broadcastLoop(Status::RESULT, self::RESULT_DURATION, $roll);
     }
 
-    private function broadcastLoop(Status $status, int $timer, ?Roll $roll = null)
+    private function broadcastLoop(Step $status, int $timer, ?Roll $roll = null)
     {
         do {
             $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
