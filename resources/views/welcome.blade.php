@@ -1,5 +1,5 @@
  <x-app-layout>
-    <div class="view-container">
+    <div>
 
     </div>
  </x-app-layout>
