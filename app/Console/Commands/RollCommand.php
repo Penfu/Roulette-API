@@ -81,16 +81,19 @@ class RollCommand extends Command
         $this->broadcastLoop(Step::BET, self::BET_DURATION);
 
         // Step 2: Close the bet, Roll the wheel
+        $this->broadcastLoop(Step::ROLL, self::ROLL_DURATION);
+
+        // Step 3: Generate the result, Roll to result
         $rndRoll = self::CASES[random_int(1, count(self::CASES)) - 1];
         $roll->color = $rndRoll['color'];
         $roll->value = $rndRoll['value'];
 
-        $this->broadcastLoop(Step::ROLL, self::ROLL_DURATION, $roll);
-
-        // Step 3: Generate the result, Roll to result
         $roll->ended_at = now();
         $roll->save();
 
+        $this->broadcastLoop(Step::ROLL_TO_RESULT, self::ROLL_TO_RESULT_DURATION, $roll);
+
+        // Step 4: Display the result
         $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
         $wins = $bets[$roll->color];
 
@@ -100,9 +103,6 @@ class RollCommand extends Command
             $user->save();
         }
 
-        $this->broadcastLoop(Step::ROLL_TO_RESULT, self::ROLL_TO_RESULT_DURATION, $roll);
-
-        // Step 4: Display the result
         $this->broadcastLoop(Step::DISPLAY_RESULT, self::DISPLAY_RESULT_DURATION, $roll);
 
         // Reset
