@@ -5,28 +5,29 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 use App\Models\User;
-use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
     public function register(Request $request): JsonResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'unique:users'],
+            'name'     => ['required', 'string', 'max:255', 'unique:users'],
+            'email'    => ['required', 'string', 'email', 'unique:users'],
             'password' => ['required', 'string', 'min:8'],
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => bcrypt($request->password),
-            'balance' => 1000,
+            'balance'  => 1000,
         ]);
 
         return response()->json([
+            'user'  => $user,
             'token' => $user->createToken('token')->plainTextToken,
         ]);
     }
