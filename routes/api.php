@@ -30,4 +30,4 @@ Route::get('users/{user:name}/stats', [UserController::class, 'stats']);
 Route::apiResource('rolls', RollController::class)->only(['index']);
 
 Route::apiResource('bets', BetController::class)->only(['store'])->middleware('auth:sanctum');
-Route::get('/bets/{bet}/roll', [BetController::class, 'getRoll'])->middleware('auth:sanctum');
+Route::get('/bets/{bet}/roll', [BetController::class, 'getRoll']);
