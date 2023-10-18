@@ -1,0 +1,29 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  create-deployment-artifacts:
+    name: Create deployment artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Compile CSS and JavaScript
+        run: |
+          npm install
+          npm run prod
+
+      - name: Configure PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: ctype, curl, dom, fileinfo, filter, hash, mbstring, openssl, pcre, pdo, session, tokenizer, xml
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --no-interaction --no-progress --no-suggest --optimize-autoloader --prefer-dist
+
