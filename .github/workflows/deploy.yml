@@ -37,15 +37,14 @@ jobs:
       - name: Link storage
         run: php artisan storage:link
 
-      - name: Migrate database
-        run: php artisan migrate
-
-      - name: Deploy to Server
+      - name: Set up SSH Tunnel
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i --delete"
-          SOURCE: "dist/"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ secrets.REMOTE_TARGET }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          TARGET: ${{ secrets.SSH_TARGET }}
+
+      - name: Migrate database
+        run: php artisan migrate --verbose --force
