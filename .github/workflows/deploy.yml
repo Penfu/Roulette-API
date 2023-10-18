@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@main
 
       - name: Compile CSS and JavaScript
         run: |
@@ -26,5 +26,5 @@ jobs:
           extensions: ctype, curl, dom, fileinfo, filter, hash, mbstring, openssl, pcre, pdo, session, tokenizer, xml
 
       - name: Install Composer dependencies
-        run: composer install --no-dev --no-interaction --no-progress --no-suggest --optimize-autoloader --prefer-dist
+        run: composer install -q --no-dev --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
