@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Bet extends Model
 {
-    use BroadcastsEvents, HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'color',
-        'value',
+        'amount',
         'user_id',
         'roll_id',
     ];
+
+    protected $appends = ['is_win'];
+
+    protected $hidden = ['roll'];
 
     public function user()
     {
@@ -25,5 +28,25 @@ class Bet extends Model
     public function roll()
     {
         return $this->belongsTo(Roll::class);
+    }
+
+    public function getIsWinAttribute()
+    {
+        return $this->color === $this->roll->color;
+    }
+
+    public function ScopeRed($query)
+    {
+        return $query->where('color', 'red');
+    }
+
+    public function ScopeBlack($query)
+    {
+        return $query->where('color', 'black');
+    }
+
+    public function ScopeGreen($query)
+    {
+        return $query->where('color', 'green');
     }
 }

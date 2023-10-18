@@ -13,6 +13,6 @@ class RollController extends Controller
      */
     public function index()
     {
-        return Roll::orderBy('id', 'desc')->take(10)->get();
+        return Roll::ended()->orderBy('id', 'desc')->take(10)->get();
     }
 }

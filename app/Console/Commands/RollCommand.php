@@ -6,21 +6,24 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Console\Command;
 
 use App\Events\RollEvent;
+use App\Helpers\ColorHelper;
 use App\Models\User;
 use App\Models\Roll;
 
-enum Status
+enum Step
 {
-    case OPEN;
-    case CLOSE;
-    case RESULT;
+    case BET;
+    case ROLL;
+    case ROLL_TO_RESULT;
+    case DISPLAY_RESULT;
 
     public function value(): string
     {
         return match ($this) {
-            Status::OPEN => 'OPEN',
-            Status::CLOSE => 'CLOSE',
-            Status::RESULT => 'RESULT',
+            Step::BET => 'BET',
+            Step::ROLL => 'ROLL',
+            Step::ROLL_TO_RESULT => 'ROLL_TO_RESULT',
+            Step::DISPLAY_RESULT => 'DISPLAY_RESULT',
         };
     }
 }
@@ -41,10 +44,13 @@ class RollCommand extends Command
      */
     protected $description = 'Command description';
 
-    const BROADCAST_FREQUENCY = 500; // ms
-    const OPEN_BET_DURATION   = 15000; // ms
-    const ROLL_DURATION       = 5000; // ms
-    const RESULT_DURATION     = 5000; // ms
+    // Duration of each step in ms
+    const BROADCAST_FREQUENCY = 500;
+
+    const BET_DURATION = 15000;
+    const ROLL_DURATION = 4000;
+    const ROLL_TO_RESULT_DURATION = 2000;
+    const DISPLAY_RESULT_DURATION = 5000;
 
     const CASES = [
         ['value' => 1, 'color' => 'red'],
@@ -67,46 +73,51 @@ class RollCommand extends Command
      */
     public function handle()
     {
+        // Create roll
         $roll = Roll::create();
-
         Cache::put('roll_id', $roll->id);
-        Cache::forget('bets');
 
-        // Open bet
-        $this->broadcastLoop(Status::OPEN, self::OPEN_BET_DURATION);
+        // Step 1: Open bet
+        $this->broadcastLoop(Step::BET, self::BET_DURATION);
 
-        // Close bet
+        // Step 2: Close the bet, Roll the wheel
+        $this->broadcastLoop(Step::ROLL, self::ROLL_DURATION);
+
+        // Step 3: Generate the result, Roll to result
         $rndRoll = self::CASES[random_int(1, count(self::CASES)) - 1];
         $roll->color = $rndRoll['color'];
         $roll->value = $rndRoll['value'];
 
-        $this->broadcastLoop(Status::CLOSE, self::ROLL_DURATION, $roll);
-
-        // Result
+        $roll->ended_at = now();
         $roll->save();
-        $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
-        $winningBets = $bets[$roll->color];
 
-        foreach ($winningBets as $bet) {
+        $this->broadcastLoop(Step::ROLL_TO_RESULT, self::ROLL_TO_RESULT_DURATION, $roll);
+
+        // Step 4: Display the result
+        $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
+        $wins = $bets[$roll->color];
+
+        foreach ($wins as $bet) {
             $user = User::where('name', $bet['user'])->first();
-            $user->balance += $bet['value'] * 2;
+            $user->balance += $bet['amount'] * ColorHelper::MULTIPLIERS[$roll->color];
             $user->save();
         }
 
-        $this->broadcastLoop(Status::RESULT, self::RESULT_DURATION, $roll);
+        $this->broadcastLoop(Step::DISPLAY_RESULT, self::DISPLAY_RESULT_DURATION, $roll);
+
+        // Reset
+        Cache::forget('bets');
     }
 
-    private function broadcastLoop(Status $status, int $timer, ?Roll $roll = null)
+    private function broadcastLoop(Step $status, int $timer, ?Roll $roll = null)
     {
         do {
-            $bets = $status == Status::RESULT
-                ? []
-                : Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
+            $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
 
             broadcast(new RollEvent($status->value(), $timer, $bets, $roll));
 
             usleep(self::BROADCAST_FREQUENCY * 1000);
             $timer -= self::BROADCAST_FREQUENCY;
-        } while ($timer > 0);
+        } while ($timer >= 0);
     }
 }
