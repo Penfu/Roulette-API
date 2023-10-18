@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 jobs:
   create-deployment-artifacts:
-    name: Create deployment artifacts
+    name: Deploy on staging
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,8 +28,8 @@ jobs:
       - name: Install Composer dependencies
         run: composer install -q --no-dev --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Copy .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Setup environment variables
+        run: php artisan env:decrypt --env=staging --force --key=${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }} && cp .env.staging .env
 
       - name: Generate key
         run: php artisan key:generate
@@ -37,7 +37,7 @@ jobs:
       - name: Link storage
         run: php artisan storage:link
 
-      - name: Set up SSH Tunnel
+      - name: Setup SSH Tunnel
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -45,6 +45,8 @@ jobs:
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_USER: ${{ secrets.SSH_USER }}
           TARGET: ${{ secrets.SSH_TARGET }}
+          SCRIPT_AFTER: |
+            cd ${{ secrets.SSH_TARGET }}
+            php artisan cache:clear
+            php artisan migrate --force
 
-      - name: Migrate database
-        run: php artisan migrate --verbose --force
