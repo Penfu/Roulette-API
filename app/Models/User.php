@@ -44,6 +44,13 @@ class User extends Authenticatable
         return $this->hasMany(Roll::class);
     }
 
+    public function winnedBets()
+    {
+        return $this->bets()->whereHas('roll', function ($query) {
+            $query->where('color', $this->bets()->first()?->color);
+        });
+    }
+
     public function stats()
     {
         return [
@@ -58,12 +65,5 @@ class User extends Authenticatable
             'total_bet' => $this->bets()->sum('amount'),
             'total_winnings' => $this->winnedBets()->sum('amount'),
         ];
-    }
-
-    public function winnedBets()
-    {
-        return $this->bets()->whereHas('roll', function ($query) {
-            $query->where('color', $this->bets()->first()?->color);
-        });
     }
 }

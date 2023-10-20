@@ -21,7 +21,14 @@ npm install
 
 ### Environment and Database
 
-Setup the environment variables by making your own **.env** file from the example one.
+Setup the environment variables by making your own **.env** file.
+
+For staging, decrypt the **.env.staging.encrypted** file with the password **secret**. Then rename it to **.env**.
+
+```bash
+php artisan env:decrypt --env=staging --key=[secret] --force
+```
+
 Then run the migrations and seeders.
 
 ```bash
