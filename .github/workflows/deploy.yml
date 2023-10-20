@@ -48,5 +48,3 @@ jobs:
           SCRIPT_AFTER: |
             cd ${{ secrets.SSH_TARGET }}
             php artisan cache:clear
-            php artisan migrate --force
-            php artisan short-schedule:run

@@ -15,12 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-
-    }
-
-    protected function shortSchedule(\Spatie\ShortSchedule\ShortSchedule $shortSchedule)
-    {
-        $shortSchedule->command('roll')->everySeconds(30);
+        $schedule->command('roll')->everyThirtySeconds()->runInBackground();
     }
 
     /**
