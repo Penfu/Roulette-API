@@ -7,17 +7,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Controllers\Controller;
+
+use App\Http\Requests\UserStoreRequest;
 use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
+    public function register(UserStoreRequest $request): JsonResponse
     {
-        $request->validate([
-            'name'     => ['required', 'string', 'max:255', 'unique:users'],
-            'email'    => ['required', 'string', 'email', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
+        $validated = $request->validated();
 
         $user = User::create([
             'name'     => $request->name,

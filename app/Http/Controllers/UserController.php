@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+use App\Models\User;
 
 class UserController extends Controller
 {
@@ -20,6 +22,27 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        return response()->json($user);
+    }
+
+    public function updateEmail(Request $request)
+    {
+        Log::info($request->all());
+        $user = $request->user();
+
+        if (!$request->password) {
+            return response()->json(['message' => 'Password is required'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if (!password_verify($request->password, $user->password)) {
+            return response()->json(['message' => 'Password is incorrect'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $request->validate([
+            'email' => 'required|email|unique:users,email'
+        ]);
+        $user->update($request->only('email'));
+
         return response()->json($user);
     }
 
