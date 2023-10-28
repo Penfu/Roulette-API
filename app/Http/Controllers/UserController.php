@@ -25,9 +25,18 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function updateName(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate(['name' => 'required|string|max:12|unique:users']);
+        $user->update($request->only('name'));
+
+        return response()->json($user);
+    }
+
     public function updateEmail(Request $request)
     {
-        Log::info($request->all());
         $user = $request->user();
 
         if (!$request->password) {
@@ -38,9 +47,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Password is incorrect'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $request->validate([
-            'email' => 'required|email|unique:users,email'
-        ]);
+        $request->validate(['email' => 'required|email|unique:users']);
         $user->update($request->only('email'));
 
         return response()->json($user);
