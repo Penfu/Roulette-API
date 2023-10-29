@@ -53,6 +53,24 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function updatePassword(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$request->password) {
+            return response()->json(['message' => 'Password is required'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if (!password_verify($request->password, $user->password)) {
+            return response()->json(['message' => 'Password is incorrect'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $request->validate(['new_password' => 'required|string|min:8|confirmed']);
+        $user->update(['password' => bcrypt($request->new_password)]);
+
+        return response()->json($user);
+    }
+
     public function destroy(Request $request)
     {
         $user = $request->user();
