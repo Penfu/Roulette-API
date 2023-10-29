@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 use Laravel\Socialite\Facades\Socialite;
+
+use App\Models\User;
+use App\Models\OauthProvider;
 
 class SocialiteController extends Controller
 {
@@ -33,13 +35,12 @@ class SocialiteController extends Controller
             ]
         );
 
-        $user->oauthProviders()->updateOrCreate(
-            ['provider' => $provider],
-            [
-                'provider_user_id' => $providerUser->getId(),
-                'user_id' => $user->id,
-            ]
-        );
+        OauthProvider::updateOrCreate([
+            'user_id' => $user->id,
+        ], [
+            'name' => $provider,
+            'provider_user_id' => $providerUser->getId(),
+        ]);
 
         return response()->json([
             'user' => $user,
