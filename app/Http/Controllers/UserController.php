@@ -53,6 +53,23 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function destroy(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$request->password) {
+            return response()->json(['message' => 'Password is required'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if (!password_verify($request->password, $user->password)) {
+            return response()->json(['message' => 'Password is incorrect'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted']);
+    }
+
     public function bets(User $user)
     {
         $offset = request()->query('offset', 0);
