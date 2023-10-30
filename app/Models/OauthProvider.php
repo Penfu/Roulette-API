@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class OauthProvider extends Model
 {
     protected $fillable = [
-        'provider',
+        'name',
         'provider_user_id',
         'user_id',
     ];

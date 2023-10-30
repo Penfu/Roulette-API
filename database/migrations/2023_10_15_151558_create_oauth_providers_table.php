@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('oauth_providers', function (Blueprint $table) {
             $table->id();
-            $table->string('provider');
-            $table->string('provider_user_id');
+            $table->string('name');
+            $table->string('provider_user_id')->unique();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

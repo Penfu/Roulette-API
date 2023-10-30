@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+// import hasOne from Eloquent\
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -29,9 +30,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function oauthProviders()
+    protected $appends = ['provider'];
+
+    public function getProviderAttribute()
     {
-        return $this->hasMany(OauthProvider::class);
+        return OauthProvider::where('user_id', $this->id)->first()->name ?? null;
     }
 
     public function bets()
