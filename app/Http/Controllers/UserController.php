@@ -75,12 +75,12 @@ class UserController extends Controller
     {
         $user = $request->user();
 
-        if (!$request->password) {
-            return response()->json(['message' => 'Password is required'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if (!$request->keyword) {
+            return response()->json(['message' => 'User name is required'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if (!password_verify($request->password, $user->password)) {
-            return response()->json(['message' => 'Password is incorrect'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if ($request->keyword !== $user->name) {
+            return response()->json(['message' => 'User name is incorrect'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $user->delete();
