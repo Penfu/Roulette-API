@@ -34,6 +34,7 @@ Route::patch('users/me/email', [UserController::class, 'updateEmail'])->middlewa
 Route::patch('users/me/password', [UserController::class, 'updatePassword'])->middleware('auth:sanctum');
 
 Route::delete('users/me', [UserController::class, 'destroy'])->middleware('auth:sanctum');
+Route::delete('users/me/provider', [SocialiteController::class, 'unlinkProvider'])->middleware('auth:sanctum');
 
 Route::get('users/{user:name}', [UserController::class, 'show']);
 Route::get('users/{user:name}/bets', [UserController::class, 'bets']);

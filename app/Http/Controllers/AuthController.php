@@ -18,25 +18,29 @@ class AuthController extends Controller
         $validated = $request->validated();
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => bcrypt($request->password),
-            'balance'  => 1000,
+            'balance' => 1000,
         ]);
 
         return response()->json([
-            'user'  => $user,
+            'user' => $user,
             'token' => $user->createToken('token')->plainTextToken,
         ]);
     }
 
     public function login(Request $request): JsonResponse
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->provider) {
+            return response()->json(['message' => 'User have a provider'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $user = Auth::user();
+        if ($user->provider || !Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
+        }
 
         return response()->json([
             'user' => $user,
