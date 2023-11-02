@@ -16,6 +16,7 @@ class BetFactory extends Factory
             ->inRandomOrder()
             ->first();
         $roll = Roll::inRandomOrder()->first();
+
         $win = $this->faker->boolean(30); // Without, there to much lose as the odds are 1/3
         $colors = new Collection(['red', 'black', 'green']);
         $color = $win ? $roll->color : $this->faker->randomElement($colors->except($roll->color));
@@ -23,7 +24,7 @@ class BetFactory extends Factory
         $date = $this->faker->dateTimeBetween($roll->created_at, $roll->ended_at);
 
         $user->balance -= $amount;
-        if ($color == $roll->color) {
+        if ($color === $roll->color) {
             $user->balance += $amount * ColorHelper::MULTIPLIERS[$color];
         }
         $user->save();
