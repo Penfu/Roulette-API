@@ -6,7 +6,10 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Console\Command;
 
 use App\Events\RollEvent;
+
+use App\Helpers\CaseHelper;
 use App\Helpers\ColorHelper;
+
 use App\Models\User;
 use App\Models\Roll;
 
@@ -33,22 +36,6 @@ class RollCommand extends Command
     const ROLL_DURATION = 5000;
     const DISPLAY_RESULT_DURATION = 5000;
 
-    const CASES = [
-        ['value' => 1, 'color' => 'red'],
-        ['value' => 2, 'color' => 'black'],
-        ['value' => 3, 'color' => 'red'],
-        ['value' => 4, 'color' => 'black'],
-        ['value' => 5, 'color' => 'red'],
-        ['value' => 6, 'color' => 'black'],
-        ['value' => 7, 'color' => 'red'],
-        ['value' => 8, 'color' => 'black'],
-        ['value' => 9, 'color' => 'red'],
-        ['value' => 10, 'color' => 'black'],
-        ['value' => 11, 'color' => 'red'],
-        ['value' => 12, 'color' => 'black'],
-        ['value' => 13, 'color' => 'green']
-    ];
-
     /**
      * Execute the console command.
      */
@@ -63,7 +50,7 @@ class RollCommand extends Command
 
 
         // Step 2: Generate the result,
-        $rndRoll = self::CASES[random_int(1, count(self::CASES)) - 1];
+        $rndRoll = CaseHelper::random();
         $roll->color = $rndRoll['color'];
         $roll->value = $rndRoll['value'];
 
