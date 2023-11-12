@@ -6,27 +6,12 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Console\Command;
 
 use App\Events\RollEvent;
+
+use App\Helpers\CaseHelper;
 use App\Helpers\ColorHelper;
+
 use App\Models\User;
 use App\Models\Roll;
-
-enum Step
-{
-    case BET;
-    case ROLL;
-    case ROLL_TO_RESULT;
-    case DISPLAY_RESULT;
-
-    public function value(): string
-    {
-        return match ($this) {
-            Step::BET => 'BET',
-            Step::ROLL => 'ROLL',
-            Step::ROLL_TO_RESULT => 'ROLL_TO_RESULT',
-            Step::DISPLAY_RESULT => 'DISPLAY_RESULT',
-        };
-    }
-}
 
 class RollCommand extends Command
 {
@@ -48,25 +33,8 @@ class RollCommand extends Command
     const BROADCAST_FREQUENCY = 500;
 
     const BET_DURATION = 15000;
-    const ROLL_DURATION = 4000;
-    const ROLL_TO_RESULT_DURATION = 2000;
+    const ROLL_DURATION = 5000;
     const DISPLAY_RESULT_DURATION = 5000;
-
-    const CASES = [
-        ['value' => 1, 'color' => 'red'],
-        ['value' => 2, 'color' => 'black'],
-        ['value' => 3, 'color' => 'red'],
-        ['value' => 4, 'color' => 'black'],
-        ['value' => 5, 'color' => 'red'],
-        ['value' => 6, 'color' => 'black'],
-        ['value' => 7, 'color' => 'red'],
-        ['value' => 8, 'color' => 'black'],
-        ['value' => 9, 'color' => 'red'],
-        ['value' => 10, 'color' => 'black'],
-        ['value' => 11, 'color' => 'red'],
-        ['value' => 12, 'color' => 'black'],
-        ['value' => 13, 'color' => 'green'],
-     ];
 
     /**
      * Execute the console command.
@@ -78,20 +46,19 @@ class RollCommand extends Command
         Cache::put('roll_id', $roll->id);
 
         // Step 1: Open bet
-        $this->broadcastLoop(Step::BET, self::BET_DURATION);
+        $this->broadcastLoop('BET', self::BET_DURATION);
 
-        // Step 2: Close the bet, Roll the wheel
-        $this->broadcastLoop(Step::ROLL, self::ROLL_DURATION);
 
-        // Step 3: Generate the result, Roll to result
-        $rndRoll = self::CASES[random_int(1, count(self::CASES)) - 1];
+        // Step 2: Generate the result,
+        $rndRoll = CaseHelper::random();
         $roll->color = $rndRoll['color'];
         $roll->value = $rndRoll['value'];
 
         $roll->ended_at = now();
         $roll->save();
 
-        $this->broadcastLoop(Step::ROLL_TO_RESULT, self::ROLL_TO_RESULT_DURATION, $roll);
+        // Step 3: Roll the wheel
+        $this->broadcastLoop('ROLL', self::ROLL_DURATION, $roll);
 
         // Step 4: Display the result
         $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
@@ -103,18 +70,25 @@ class RollCommand extends Command
             $user->save();
         }
 
-        $this->broadcastLoop(Step::DISPLAY_RESULT, self::DISPLAY_RESULT_DURATION, $roll);
+        $this->broadcastLoop('DISPLAY_RESULT', self::DISPLAY_RESULT_DURATION, $roll);
 
         // Reset
         Cache::forget('bets');
     }
 
-    private function broadcastLoop(Step $status, int $timer, ?Roll $roll = null)
+    private function broadcastLoop(string $status, int $timer, ?Roll $roll = null)
     {
+        $history = Roll::ended()
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn($roll) => ['value' => $roll->value, 'color' => $roll->color])
+            ->toArray();
+
         do {
             $bets = Cache::get('bets', ['red' => [], 'black' => [], 'green' => []]);
 
-            broadcast(new RollEvent($status->value(), $timer, $bets, $roll));
+            broadcast(new RollEvent($status, $timer, $bets, $history, $roll));
 
             usleep(self::BROADCAST_FREQUENCY * 1000);
             $timer -= self::BROADCAST_FREQUENCY;

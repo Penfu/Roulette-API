@@ -14,18 +14,13 @@ class RollEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private string $status;
-    private int $timer;
-    private array $bets;
-    private ?Roll $result;
-
-    public function __construct(string $status, int $timer = 0, array $bets = [], ?Roll $result = null)
-    {
-        $this->status = $status;
-        $this->timer = $timer;
-        $this->bets = $bets;
-        $this->result = $result;
-    }
+    public function __construct(
+        protected string $status,
+        protected int $timer = 0,
+        protected array $bets = [],
+        protected array $history = [],
+        protected ?Roll $result = null
+    ) { }
 
     public function broadcastWith()
     {
@@ -33,12 +28,11 @@ class RollEvent implements ShouldBroadcast
             'status' => $this->status,
             'timer' => $this->timer,
             'bets' => $this->bets,
-            'result' => !$this->result
-                ?: [
-                    'id' => $this->result->id,
-                    'value' => $this->result->value,
-                    'color' => $this->result->color
-                ]
+            'history' => $this->history,
+            'result' => $this->result ? [
+                'value' => $this->result->value,
+                'color' => $this->result->color,
+            ] : null,
         ];
     }
 
