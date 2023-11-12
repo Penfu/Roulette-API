@@ -34,6 +34,10 @@ class AuthController extends Controller
     {
         $user = User::where('email', $request->email)->first();
 
+        if (!$user->password) {
+            return response()->json(['message' => 'User have no password'], Response::HTTP_UNAUTHORIZED);
+        }
+
         if ($user->provider) {
             return response()->json(['message' => 'User have a provider'], Response::HTTP_UNAUTHORIZED);
         }
