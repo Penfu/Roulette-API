@@ -25,6 +25,15 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function updateAvatar(Request $request)
+    {
+        $user = $request->user();
+
+        $user->update(['avatar' => $request->avatar]);
+
+        return response()->json($user);
+    }
+
     public function updateName(Request $request)
     {
         $user = $request->user();
