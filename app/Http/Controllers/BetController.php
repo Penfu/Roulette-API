@@ -38,7 +38,7 @@ class BetController extends Controller
         $betExists = false;
 
         foreach ($bets[$color] as $key => $bet) {
-            if ($bet['user'] == $user->name) {
+            if ($bet['user'] === $user->name) {
                 $bets[$color][$key]['amount'] += $amount;
                 $betExists = true;
             }
