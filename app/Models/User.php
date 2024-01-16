@@ -28,6 +28,7 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
+        'avatar' => 'json',
         'email_verified_at' => 'datetime',
     ];
 
