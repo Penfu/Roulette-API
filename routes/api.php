@@ -29,6 +29,7 @@ Route::get('/authorize/{provider}/callback', [SocialiteController::class, 'handl
 
 Route::get('users', [UserController::class, 'index']);
 Route::get('users/me', [UserController::class, 'me'])->middleware('auth:sanctum');
+Route::patch('users/me/avatar', [UserController::class, 'updateAvatar'])->middleware('auth:sanctum');
 Route::patch('users/me/name', [UserController::class, 'updateName'])->middleware('auth:sanctum');
 Route::patch('users/me/email', [UserController::class, 'updateEmail'])->middleware('auth:sanctum');
 Route::patch('users/me/password', [UserController::class, 'updatePassword'])->middleware('auth:sanctum');

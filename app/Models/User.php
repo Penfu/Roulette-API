@@ -19,6 +19,7 @@ class User extends Authenticatable
         'email',
         'password',
         'balance',
+        'avatar'
     ];
 
     protected $hidden = [
@@ -27,6 +28,7 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
+        'avatar' => 'json',
         'email_verified_at' => 'datetime',
     ];
 
