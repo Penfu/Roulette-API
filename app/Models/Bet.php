@@ -49,4 +49,11 @@ class Bet extends Model
     {
         return $query->where('color', 'green');
     }
+
+    public function scopeWin($query)
+    {
+        return $query->whereHas('roll', function ($subQuery) {
+            $subQuery->whereColumn('bets.color', 'rolls.color');
+        });
+    }
 }

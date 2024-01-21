@@ -34,7 +34,8 @@ class SocialiteController extends Controller
             [
                 'name' => $providerUser->getName(),
                 'password' => null,
-                'balance' => 1000
+                'balance' => 1000,
+                'avatar' => null,
             ]
         );
 

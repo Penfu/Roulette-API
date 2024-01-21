@@ -34,15 +34,15 @@ class AuthController extends Controller
     {
         $user = User::where('email', $request->email)->first();
 
-        if (!$user->password) {
-            return response()->json(['message' => 'User have no password'], Response::HTTP_UNAUTHORIZED);
+        if (!$user) {
+            return response()->json(['message' => 'Email not found'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if ($user->provider) {
-            return response()->json(['message' => 'User have a provider'], Response::HTTP_UNAUTHORIZED);
+        if ($user->provider !== null) {
+            return response()->json(['message' => "User must login with $user->provider"], Response::HTTP_UNAUTHORIZED);
         }
 
-        if ($user->provider || !Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json(['message' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
         }
 
