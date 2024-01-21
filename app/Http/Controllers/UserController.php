@@ -22,14 +22,14 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        return response()->json($user);
+        return response()->json($user->append('stats'));
     }
 
     public function updateAvatar(Request $request)
     {
         $user = $request->user();
 
-        $user->update(['avatar' => $request->avatar]);
+        $user->update($request->only('avatar'));
 
         return response()->json($user);
     }
@@ -105,10 +105,5 @@ class UserController extends Controller
         $bets = $user->bets()->with('roll')->offset($offset)->limit($limit)->latest()->get();
 
         return response()->json($bets);
-    }
-
-    public function stats(User $user)
-    {
-        return response()->json($user->stats());
     }
 }

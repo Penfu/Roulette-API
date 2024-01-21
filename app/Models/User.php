@@ -49,26 +49,35 @@ class User extends Authenticatable
         return $this->hasMany(Roll::class);
     }
 
-    public function winnedBets()
+    private $colors = ['red', 'black', 'green'];
+
+    public function getStatsAttribute()
     {
-        return $this->bets()->whereHas('roll', function ($query) {
-            $query->where('color', $this->bets()->first()?->color);
-        });
-    }
+        $data = [];
 
-    public function stats()
-    {
-        return [
-            'bets_on_red' => $this->bets()->where('color', 'red')->count(),
-            'bets_on_black' => $this->bets()->where('color', 'black')->count(),
-            'bets_on_green' => $this->bets()->where('color', 'green')->count(),
+        foreach ($this->colors as $color) {
+            $data[$color] = [
+                'bet' => [
+                    'count' => $this->bets()->{$color}()->count(),
+                    'amount' => $this->bets()->{$color}()->sum('amount'),
+                ],
+                'won' => [
+                    'count' => $this->bets()->win()->{$color}()->count(),
+                    'amount' => $this->bets()->win()->{$color}()->sum('amount'),
+                ],
+            ];
+        }
 
-            'red_wins' => $this->winnedBets()->where('color', 'red')->count(),
-            'black_wins' => $this->winnedBets()->where('color', 'black')->count(),
-            'green_wins' => $this->winnedBets()->where('color', 'green')->count(),
-
-            'total_bet' => $this->bets()->sum('amount'),
-            'total_winnings' => $this->winnedBets()->sum('amount'),
+        $data['bet'] = [
+            'count' => $this->bets()->count(),
+            'amount' => $this->bets()->sum('amount'),
         ];
+
+        $data['won'] = [
+            'count' => $this->bets()->win()->count(),
+            'amount' => $this->bets()->win()->sum('amount'),
+        ];
+
+        return $data;
     }
 }
