@@ -99,11 +99,7 @@ class UserController extends Controller
 
     public function bets(User $user)
     {
-        $offset = request()->query('offset', 0);
-        $limit = request()->query('limit', 10);
-
-        $bets = $user->bets()->with('roll')->offset($offset)->limit($limit)->latest()->get();
-
+        $bets = $user->bets()->with('roll')->orderByDesc('id')->cursorPaginate(10);
         return response()->json($bets);
     }
 }
