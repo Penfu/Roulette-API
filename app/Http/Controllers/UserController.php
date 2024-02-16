@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\Response;
 
 use App\Models\User;
@@ -75,7 +76,7 @@ class UserController extends Controller
         }
 
         $request->validate(['new_password' => 'required|string|min:8|confirmed']);
-        $user->update(['password' => bcrypt($request->new_password)]);
+        $user->update(['password' => Hash::make($request->new_password)]);
 
         return response()->json($user);
     }
@@ -94,12 +95,13 @@ class UserController extends Controller
 
         $user->delete();
 
-        return response()->json(['message' => 'User deleted']);
+        return response()->noContent();
     }
 
     public function bets(User $user)
     {
         $bets = $user->bets()->with('roll')->orderByDesc('id')->cursorPaginate(10);
+
         return response()->json($bets);
     }
 }

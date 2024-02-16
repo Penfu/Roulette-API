@@ -1,11 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 use App\Models\User;
 use App\Models\OauthProvider;
@@ -21,7 +25,7 @@ class SocialiteController extends Controller
         return response()->json(['redirect' => $url]);
     }
 
-    public function handleProviderCallback(string $provider)
+    public function handleProviderCallback(Request $request, string $provider)
     {
         $providerUser = Socialite::driver($provider)->stateless()->user();
 
@@ -34,22 +38,22 @@ class SocialiteController extends Controller
             [
                 'name' => $providerUser->getName(),
                 'password' => null,
-                'balance' => 1000,
-                'avatar' => null,
+                'balance' => 1000
             ]
         );
 
-        OauthProvider::updateOrCreate([
-            'user_id' => $user->id,
-        ], [
-            'name' => $provider,
-            'provider_user_id' => $providerUser->getId(),
-        ]);
+        OauthProvider::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'name' => $provider,
+                'provider_user_id' => $providerUser->getId()
+            ]
+        );
 
-        return response()->json([
-            'user' => $user,
-            'token' => $user->createToken('token')->plainTextToken,
-        ]);
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return response()->noContent();
     }
 
     public function unlinkProvider(Request $request)
@@ -62,13 +66,18 @@ class SocialiteController extends Controller
         }
 
         $password = bin2hex(random_bytes(16));
-        $user->password = bcrypt($password);
+        $user->password = Hash::make($password);
         $user->save();
 
         OauthProvider::where('user_id', $user->id)->delete();
 
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         Mail::to("sypenfu@gmail.com")->send(new AccountUnlinkedFromProvider($user, $provider, $password));
 
-        return response()->json($user);
+        return response()->noContent();
     }
 }

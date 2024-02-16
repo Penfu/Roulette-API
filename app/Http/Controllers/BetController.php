@@ -55,6 +55,8 @@ class BetController extends Controller
 
         $user->balance -= $amount;
         $user->save();
+
+        return response()->noContent();
     }
 
     public function getRoll(Bet $bet)
