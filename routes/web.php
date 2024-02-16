@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,5 +14,7 @@
 */
 
 Route::get('/', function () {
-    return redirect(env('SPA_URL'));
+    return ['Laravel' => app()->version()];
 });
+
+require __DIR__.'/auth.php';

@@ -1,11 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\RollController;
 use App\Http\Controllers\BetController;
 
 /*
@@ -18,6 +18,10 @@ use App\Http\Controllers\BetController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
+    return $request->user();
+});
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login');
