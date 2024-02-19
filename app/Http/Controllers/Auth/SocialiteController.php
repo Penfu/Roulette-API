@@ -50,7 +50,7 @@ class SocialiteController extends Controller
             ]
         );
 
-        Auth::login($user);
+        Auth::login($user, true);
         $request->session()->regenerate();
 
         return response()->noContent();
